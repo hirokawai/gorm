@@ -1,5 +1,7 @@
 # GORM
 
+Just a folk and fix scan function to work with oracle
+
 The fantastic ORM library for Golang, aims to be developer friendly.
 
 [![go report card](https://goreportcard.com/badge/github.com/jinzhu/gorm "go report card")](https://goreportcard.com/report/github.com/jinzhu/gorm)
