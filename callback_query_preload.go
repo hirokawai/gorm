@@ -155,7 +155,7 @@ func (scope *Scope) handleHasOnePreload(field *Field, conditions []interface{}) 
 		currentKey := 1001
 
 		for remainKeys > 0 {
-			lastIndex := int(math.Min(float64(len(primaryKeys)), float64(currentKey+1000)))
+			lastIndex := int(math.Min(float64(len(primaryKeys))+1, float64(currentKey+1000)))
 			query += fmt.Sprintf(" OR %v IN (%v)", toQueryCondition(scope, relation.ForeignDBNames), toQueryMarks(primaryKeys[currentKey:lastIndex]))
 			remainKeys -= 1000
 			currentKey += 1000
@@ -223,7 +223,7 @@ func (scope *Scope) handleHasManyPreload(field *Field, conditions []interface{})
 		currentKey := 1001
 
 		for remainKeys > 0 {
-			lastIndex := int(math.Min(float64(len(primaryKeys)), float64(currentKey+1000)))
+			lastIndex := int(math.Min(float64(len(primaryKeys))+1, float64(currentKey+1000)))
 			query += fmt.Sprintf(" OR %v IN (%v)", toQueryCondition(scope, relation.ForeignDBNames), toQueryMarks(primaryKeys[currentKey:lastIndex]))
 			remainKeys -= 1000
 			currentKey += 1000
