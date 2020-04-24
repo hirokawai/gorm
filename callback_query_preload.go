@@ -3,6 +3,7 @@ package gorm
 import (
 	"errors"
 	"fmt"
+	"math"
 	"reflect"
 	"strconv"
 	"strings"
@@ -144,7 +145,23 @@ func (scope *Scope) handleHasOnePreload(field *Field, conditions []interface{}) 
 	preloadDB, preloadConditions := scope.generatePreloadDBWithConditions(conditions)
 
 	// find relations
-	query := fmt.Sprintf("%v IN (%v)", toQueryCondition(scope, relation.ForeignDBNames), toQueryMarks(primaryKeys))
+	var query string
+
+	if len(primaryKeys) <= 1000 {
+		query = fmt.Sprintf("%v IN (%v)", toQueryCondition(scope, relation.ForeignDBNames), toQueryMarks(primaryKeys))
+	} else {
+		query = fmt.Sprintf("%v IN (%v)", toQueryCondition(scope, relation.ForeignDBNames), toQueryMarks(primaryKeys[:999]))
+		remainKeys := len(primaryKeys) - 1000
+		currentKey := 1000
+
+		for remainKeys > 0 {
+			lastIndex := int(math.Min(float64(len(primaryKeys)-1), float64(currentKey+1000)-1))
+			query += fmt.Sprintf(" OR %v IN (%v)", toQueryCondition(scope, relation.ForeignDBNames), toQueryMarks(primaryKeys[currentKey:lastIndex]))
+			remainKeys -= 1000
+			currentKey += 1000
+		}
+	}
+
 	values := toQueryValues(primaryKeys)
 	if relation.PolymorphicType != "" {
 		query += fmt.Sprintf(" AND %v = ?", scope.Quote(relation.PolymorphicDBName))
@@ -196,7 +213,23 @@ func (scope *Scope) handleHasManyPreload(field *Field, conditions []interface{})
 	preloadDB, preloadConditions := scope.generatePreloadDBWithConditions(conditions)
 
 	// find relations
-	query := fmt.Sprintf("%v IN (%v)", toQueryCondition(scope, relation.ForeignDBNames), toQueryMarks(primaryKeys))
+	var query string
+
+	if len(primaryKeys) <= 1000 {
+		query = fmt.Sprintf("%v IN (%v)", toQueryCondition(scope, relation.ForeignDBNames), toQueryMarks(primaryKeys))
+	} else {
+		query = fmt.Sprintf("%v IN (%v)", toQueryCondition(scope, relation.ForeignDBNames), toQueryMarks(primaryKeys[:999]))
+		remainKeys := len(primaryKeys) - 1000
+		currentKey := 1000
+
+		for remainKeys > 0 {
+			lastIndex := int(math.Min(float64(len(primaryKeys)-1), float64(currentKey+1000)-1))
+			query += fmt.Sprintf(" OR %v IN (%v)", toQueryCondition(scope, relation.ForeignDBNames), toQueryMarks(primaryKeys[currentKey:lastIndex]))
+			remainKeys -= 1000
+			currentKey += 1000
+		}
+	}
+
 	values := toQueryValues(primaryKeys)
 	if relation.PolymorphicType != "" {
 		query += fmt.Sprintf(" AND %v = ?", scope.Quote(relation.PolymorphicDBName))
