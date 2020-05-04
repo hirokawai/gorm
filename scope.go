@@ -346,6 +346,10 @@ func (scope *Scope) CombinedConditionSql() string {
 	if scope.Search.raw {
 		whereSQL = strings.TrimSuffix(strings.TrimPrefix(whereSQL, "WHERE ("), ")")
 	}
+	if scope.Dialect().GetName() == "godror" {
+		return joinSQL + whereSQL + scope.groupSQL() +
+			scope.havingSQL() + scope.orderSQL()
+	}
 	return joinSQL + whereSQL + scope.groupSQL() +
 		scope.havingSQL() + scope.orderSQL() + scope.limitAndOffsetSQL()
 }
@@ -844,7 +848,11 @@ func (scope *Scope) prepareQuerySQL() {
 	if scope.Search.raw {
 		scope.Raw(scope.CombinedConditionSql())
 	} else {
-		scope.Raw(fmt.Sprintf("SELECT %v FROM %v %v", scope.selectSQL(), scope.QuotedTableName(), scope.CombinedConditionSql()))
+		if scope.Dialect().GetName() == "godror" && scope.limitAndOffsetSQL() != "" {
+			scope.Raw(fmt.Sprintf("SELECT z2.* FROM (SELECT ROWNUM AS db_rownum, z1.* FROM (SELECT %v FROM %v %v) z1) z2 %v", scope.selectSQL(), scope.QuotedTableName(), scope.CombinedConditionSql(), scope.limitAndOffsetSQL()))
+		} else {
+			scope.Raw(fmt.Sprintf("SELECT %v FROM %v %v", scope.selectSQL(), scope.QuotedTableName(), scope.CombinedConditionSql()))
+		}
 	}
 	return
 }
