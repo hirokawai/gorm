@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 	"reflect"
 	"strconv"
 	"strings"
@@ -22,10 +21,8 @@ import (
 	"github.com/erikstmartin/go-testdb"
 	"github.com/jinzhu/now"
 	"github.com/lifulltechvn/gorm"
-	_ "github.com/lifulltechvn/gorm/dialects/mssql"
 	_ "github.com/lifulltechvn/gorm/dialects/mysql"
 	"github.com/lifulltechvn/gorm/dialects/postgres"
-	_ "github.com/lifulltechvn/gorm/dialects/sqlite"
 )
 
 var (
@@ -58,20 +55,8 @@ func OpenTestConnection() (db *gorm.DB, err error) {
 			dbDSN = "user=gorm password=gorm DB.name=gorm port=9920 sslmode=disable"
 		}
 		db, err = gorm.Open("postgres", dbDSN)
-	case "mssql":
-		// CREATE LOGIN gorm WITH PASSWORD = 'LoremIpsum86';
-		// CREATE DATABASE gorm;
-		// USE gorm;
-		// CREATE USER gorm FROM LOGIN gorm;
-		// sp_changedbowner 'gorm';
-		fmt.Println("testing mssql...")
-		if dbDSN == "" {
-			dbDSN = "sqlserver://gorm:LoremIpsum86@localhost:9930?database=gorm"
-		}
-		db, err = gorm.Open("mssql", dbDSN)
 	default:
-		fmt.Println("testing sqlite3...")
-		db, err = gorm.Open("sqlite3", filepath.Join(os.TempDir(), "gorm.db"))
+		fmt.Println("testing exit")
 	}
 
 	// db.SetLogger(Logger{log.New(os.Stdout, "\r\n", 0)})

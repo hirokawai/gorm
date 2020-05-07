@@ -1,14 +1,15 @@
 // Package godror oracle dialect for gorm. using godror driver
-package oracle
+package godror
 
 import (
 	"fmt"
-	_ "github.com/godror/godror" //For using oracle driver
-	"github.com/lifulltechvn/gorm"
 	"reflect"
 	"strconv"
 	"strings"
 	"time"
+
+	_ "github.com/godror/godror" //For using oracle driver
+	"github.com/lifulltechvn/gorm"
 )
 
 type godror struct {
@@ -19,20 +20,15 @@ type godror struct {
 func init() {
 	gorm.RegisterDialect("godror", &godror{})
 }
-func (s godror) LimitAndOffsetSQL(limit, offset interface{}) (sql string, err error) {
-	fmt.Println("Entering LimitAndOffsetSQL function. Only work from Oracle 12")
-	if limit != nil {
-		if parsedLimit, err := strconv.ParseInt(fmt.Sprint(limit), 0, 0); err == nil && parsedLimit >= 0 {
-			sql += fmt.Sprintf(" FETCH NEXT %d ROWS ONLY", parsedLimit)
 
-			if offset != nil {
-				if parsedOffset, err := strconv.ParseInt(fmt.Sprint(offset), 0, 0); err == nil && parsedOffset >= 0 {
-					sql += fmt.Sprintf(" OFFSET %d ROWS ", parsedOffset)
-				}
+func (s godror) LimitAndOffsetSQL(limit, offset interface{}) (sql string, err error) {
+	if limit != nil && offset != nil {
+		if parsedLimit, err := strconv.ParseInt(fmt.Sprint(limit), 0, 0); err == nil && parsedLimit >= 0 {
+			if parsedOffset, err := strconv.ParseInt(fmt.Sprint(offset), 0, 0); err == nil && parsedOffset >= 0 {
+				sql += fmt.Sprintf(" WHERE z2.db_rownum BETWEEN %d AND %d ", parsedOffset+1, parsedOffset+parsedLimit)
 			}
 		}
 	}
-	fmt.Println("LimitAndOffsetSQL: " + sql)
 	return
 }
 
@@ -181,14 +177,6 @@ func (s *godror) DataTypeOf(field *gorm.StructField) string {
 		default:
 			if gorm.IsByteArrayOrSlice(dataValue) {
 				sqlType = "VARCHAR2"
-
-				/*if isUUID(dataValue) {
-					sqlType = "VARCHAR2"
-				}
-
-				if isJSON(dataValue) {
-					sqlType = "CLOB"
-				}*/
 			}
 		}
 	}
