@@ -1,4 +1,4 @@
-module github.com/lifulltechvn/gorm
+module github.com/hirokawai/gorm
 
 go 1.12
 
