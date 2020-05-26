@@ -496,8 +496,9 @@ func (scope *Scope) scan(rows *sql.Rows, columns []string, fields []*Field) {
 			selectFields = selectFields[offset:]
 		}
 
+		upperColumn := strings.ToUpper(column)
 		for fieldIndex, field := range selectFields {
-			if strings.ToUpper(field.DBName) == strings.ToUpper(column) {
+			if strings.ToUpper(field.DBName) == upperColumn {
 				if field.Field.Kind() == reflect.Ptr {
 					values[index] = field.Field.Addr().Interface()
 				} else {
